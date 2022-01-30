@@ -15,16 +15,16 @@ class UnFlatten(nn.Module):
 
 
 class ConvVAE(nn.Module):
-    def __init__(self, image_channels=60, h_dim=952576, z_dim=1):
+    def __init__(self, image_channels=60, h_dim=120, z_dim=16):
         super(ConvVAE, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Conv2d(image_channels, 32, kernel_size=4),
+            nn.Conv2d(image_channels, 64, kernel_size=4, stride=4), # 512/4=128, (B, 64, 128, 128)
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4,stride=2),
+            nn.Conv2d(64, 80, kernel_size=4,stride=4), # 128/4=32 (B, 80, 32, 32)
             nn.ReLU(),
-            nn.Conv2d(64, 128, kernel_size=4,stride=2),
+            nn.Conv2d(80, 100, kernel_size=4,stride=4), #32/4=8 (B, 100, 8, 8)
             nn.ReLU(),
-            nn.Conv2d(128, 256, kernel_size=4,stride=2),
+            nn.Conv2d(100, 120, kernel_size=8,stride=8), #8/8=1 (B, 120, 1, 1)
             nn.ReLU(),
             nn.Flatten()
         )
@@ -34,21 +34,21 @@ class ConvVAE(nn.Module):
 
 
         self.decoder = nn.Sequential(
-            nn.Linear(z_dim, h_dim),
-            UnFlatten(8, 256, 300, 300),
-            nn.ConvTranspose2d(256, 128, kernel_size=4,stride=2),
+            nn.Linear(z_dim, h_dim), nn.ReLU(),
+            UnFlatten(-1, 120, 1, 1),
+            nn.ConvTranspose2d(120, 100, kernel_size=8,stride=8),
             nn.ReLU(),
-            nn.ConvTranspose2d(128, 64, kernel_size=4,stride=2),
+            nn.ConvTranspose2d(100, 80, kernel_size=4,stride=4),
             nn.ReLU(),
-            nn.ConvTranspose2d(64, 32, kernel_size=4,stride=2),
+            nn.ConvTranspose2d(80, 64, kernel_size=4,stride=4),
             nn.ReLU(),
-            nn.ConvTranspose2d(32, image_channels, kernel_size=4, stride=2 ),
+            nn.ConvTranspose2d(64, image_channels, kernel_size=4, stride=4 ),
             nn.Sigmoid(),
         )
 
     def reparameterize(self, mu, logvar):
         eps = torch.randn(mu.size(0), mu.size(1)).to(mu.get_device())
-        z = mu + eps * torch.exp(logvar/2.)
+        z = mu + eps * torch.exp(logvar/0.5)
         return z
 
     def forward(self, x):

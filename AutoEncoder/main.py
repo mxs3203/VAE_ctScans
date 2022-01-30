@@ -1,21 +1,4 @@
-import pickle
-
 import torch
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
-import cv2 as cv
-import torchvision
-from torchvision import datasets
-from torchvision import transforms
-from torchvision.utils import save_image
-from torchsummary import summary
-
-from random import randint
-
-from IPython.display import Image
-from IPython.core.display import Image, display
 import numpy as np
 import torch.optim as optim
 import matplotlib
@@ -23,7 +6,7 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-
+import cv2 as cv
 from AutoEncoder.model import AE
 from VAE_CT.CT_DataLoader import CT_DataLoader
 
@@ -56,7 +39,10 @@ print("Test size: ", test_size)
 train_set, val_set = torch.utils.data.random_split(dataset, [train_size, test_size])
 trainLoader = DataLoader(train_set, batch_size=batch_size, num_workers=1, shuffle=True)
 valLoader = DataLoader(val_set, batch_size=batch_size, num_workers=1, shuffle=False)
-
+#test = trainLoader.dataset[34]
+#img = cv.normalize(test[:, :, 30], None, alpha = 0, beta = 255, norm_type = cv.NORM_MINMAX, dtype = cv.CV_32F)
+#plt.imshow(img, cmap=plt.cm.bone)
+#plt.show()
 
 
 for epoch in range(epochs):
@@ -65,7 +51,6 @@ for epoch in range(epochs):
 
     img = None
     for images in trainLoader:
-        images = images.view(-1, 50*50*60).to(device)
         images = images.to(device)
         optimizer.zero_grad()
         recon_images = model(images)

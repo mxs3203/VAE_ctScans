@@ -21,11 +21,11 @@ class ConvVAE(nn.Module):
             nn.Conv2d(image_channels, 64, kernel_size=4, stride=4), # 512/4=128, (B, 64, 128, 128)
             nn.ReLU(),
             nn.Conv2d(64, 80, kernel_size=4,stride=4), # 128/4=32 (B, 80, 32, 32)
-            nn.ReLU(),
+            nn.ReLU(),nn.BatchNorm2d(80),
             nn.Conv2d(80, 100, kernel_size=4,stride=4), #32/4=8 (B, 100, 8, 8)
-            nn.ReLU(),
+            nn.ReLU(),nn.BatchNorm2d(100),
             nn.Conv2d(100, 120, kernel_size=8,stride=8), #8/8=1 (B, 120, 1, 1)
-            nn.ReLU(),
+            nn.ReLU(),nn.BatchNorm2d(120),
             nn.Flatten()
         )
 

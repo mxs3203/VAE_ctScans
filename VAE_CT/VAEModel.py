@@ -15,7 +15,7 @@ class UnFlatten(nn.Module):
 
 
 class ConvVAE(nn.Module):
-    def __init__(self, image_channels=60, h_dim=120, z_dim=16):
+    def __init__(self, image_channels=60, h_dim=120, z_dim=120):
         super(ConvVAE, self).__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(image_channels, 64, kernel_size=4, stride=4), # 512/4=128, (B, 64, 128, 128)
@@ -50,6 +50,12 @@ class ConvVAE(nn.Module):
         eps = torch.randn(mu.size(0), mu.size(1)).to(mu.get_device())
         z = mu + eps * torch.exp(logvar/0.5)
         return z
+
+    def encode_img(self, x):
+        x = self.encoder(x)
+        z_mean, z_log_var = self.z_mean(x), self.z_log_var(x)
+        z = self.reparameterize(z_mean, z_log_var)
+        return x,z, z_mean, z_log_var
 
     def forward(self, x):
         x = self.encoder(x)

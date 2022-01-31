@@ -41,7 +41,7 @@ criterion = torch.nn.BCELoss(reduction='sum')
 dataset = CT_DataLoader("../data/train/", transform)
 torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
-train_size = int(len(dataset) * 0.80)
+train_size = int(len(dataset) * 0.75)
 test_size = len(dataset) - train_size
 print("Train size: ", train_size)
 print("Test size: ", test_size)

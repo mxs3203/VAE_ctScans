@@ -15,33 +15,37 @@ class UnFlatten(nn.Module):
 
 
 class ConvVAE(nn.Module):
-    def __init__(self, image_channels=60, h_dim=120, z_dim=120):
+    def __init__(self, image_channels=60, h_dim=256, z_dim=512, leakyalpha = 0.01):
         super(ConvVAE, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Conv2d(image_channels, 64, kernel_size=4, stride=4), # 512/4=128, (B, 64, 128, 128)
-            nn.ReLU(),
-            nn.Conv2d(64, 80, kernel_size=4,stride=4), # 128/4=32 (B, 80, 32, 32)
-            nn.ReLU(),nn.BatchNorm2d(80),
-            nn.Conv2d(80, 100, kernel_size=4,stride=4), #32/4=8 (B, 100, 8, 8)
-            nn.ReLU(),nn.BatchNorm2d(100),
-            nn.Conv2d(100, 120, kernel_size=8,stride=8), #8/8=1 (B, 120, 1, 1)
-            nn.ReLU(),nn.BatchNorm2d(120),
+            # 512/4=128, (B, 64, 128, 128)
+            nn.Conv2d(image_channels, 64, kernel_size=4, stride=4),
+            nn.LeakyReLU(leakyalpha),
+            # 128/4=32 (B, 80, 32, 32)
+            nn.Conv2d(64, 80, kernel_size=4,stride=4),
+            nn.LeakyReLU(leakyalpha),nn.BatchNorm2d(80),
+            # 32/4=8 (B, 100, 8, 8)
+            nn.Conv2d(80, 100, kernel_size=4,stride=4),
+            nn.LeakyReLU(leakyalpha),nn.BatchNorm2d(100),
+            # 8/8=1 (B, 120, 1, 1)
+            nn.Conv2d(100, h_dim, kernel_size=8,stride=8),
+            nn.LeakyReLU(leakyalpha),nn.BatchNorm2d(h_dim),
+            nn.Dropout2d(0.1),
             nn.Flatten()
         )
 
         self.z_mean = nn.Linear(h_dim, z_dim)
         self.z_log_var = nn.Linear(h_dim, z_dim)
 
-
         self.decoder = nn.Sequential(
-            nn.Linear(z_dim, h_dim), nn.ReLU(),
-            UnFlatten(-1, 120, 1, 1),
-            nn.ConvTranspose2d(120, 100, kernel_size=8,stride=8),
-            nn.ReLU(),
+            #nn.Linear(z_dim, h_dim), nn.ReLU(),
+            UnFlatten(-1, z_dim, 1, 1),
+            nn.ConvTranspose2d(z_dim, 100, kernel_size=8,stride=8),
+            nn.LeakyReLU(leakyalpha),
             nn.ConvTranspose2d(100, 80, kernel_size=4,stride=4),
-            nn.ReLU(),
+            nn.LeakyReLU(leakyalpha),
             nn.ConvTranspose2d(80, 64, kernel_size=4,stride=4),
-            nn.ReLU(),
+            nn.LeakyReLU(leakyalpha),
             nn.ConvTranspose2d(64, image_channels, kernel_size=4, stride=4 ),
             nn.Sigmoid(),
         )

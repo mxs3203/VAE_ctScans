@@ -15,8 +15,9 @@ class UnFlatten(nn.Module):
 
 
 class ConvVAE(nn.Module):
-    def __init__(self, image_channels=60, h_dim=256, z_dim=512):
+    def __init__(self, image_channels=60, h_dim=512, z_dim=512):
         super(ConvVAE, self).__init__()
+        self.z_size = z_dim
         self.encoder = nn.Sequential(
             # 512/4=128, (B, 64, 128, 128)
             nn.Conv2d(image_channels, 64, kernel_size=4, stride=4),
@@ -34,7 +35,7 @@ class ConvVAE(nn.Module):
             nn.ReLU(),nn.BatchNorm2d(h_dim),
             #nn.Dropout2d(0.1),
             nn.Flatten(),
-            nn.Linear(h_dim, h_dim)
+            nn.Linear(h_dim, h_dim), nn.ReLU()
         )
 
         self.z_mean = nn.Linear(h_dim, z_dim)
@@ -53,15 +54,16 @@ class ConvVAE(nn.Module):
             nn.Sigmoid(),
         )
 
-    def reparameterize(self, mu):
-        eps = torch.randn(mu.size(0), mu.size(1)).to(mu.get_device())
-        z = mu + eps * torch.randn_like(mu)
+    def reparameterize(self, mu, logvar):
+        z_std = torch.exp(logvar/2.0)
+        q = torch.distributions.Normal(mu, z_std)
+        z = q.rsample()
         return z
 
     def encode_img(self, x):
         x = self.encoder(x)
         z_mean, z_log_var = self.z_mean(x), self.z_log_var(x)
-        z = self.reparameterize(z_mean)
+        z = self.reparameterize(z_mean, z_log_var)
         return x,z, z_mean, z_log_var
 
     def forward(self, x):

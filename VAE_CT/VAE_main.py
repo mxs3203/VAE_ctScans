@@ -1,10 +1,5 @@
-import io
-import random
 
-import PIL
-import cv2 as cv
 import pandas
-import tensorboard
 import torch
 import numpy as np
 import torch.optim as optim
@@ -33,7 +28,7 @@ writer = SummaryWriter(flush_secs=1)
 # set the learning parameters
 lr = 0.001
 epochs = 200
-batch_size = 16
+batch_size = 20
 model = ConvVAE().to(device)
 optimizer = optim.Adam(model.parameters(), lr=lr)
 criterion = torch.nn.BCELoss(reduction='sum')

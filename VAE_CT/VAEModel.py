@@ -25,14 +25,12 @@ class ConvVAE(nn.Module):
             # 128/4=32 (B, 80, 32, 32)
             nn.Conv2d(64, 80, kernel_size=4,stride=4),
             nn.ReLU(),
-            nn.BatchNorm2d(80),
             # 32/4=8 (B, 100, 8, 8)
             nn.Conv2d(80, 100, kernel_size=4,stride=4),
             nn.ReLU(),
-            nn.BatchNorm2d(100),
             # 8/8=1 (B, 120, 1, 1)
             nn.Conv2d(100, h_dim, kernel_size=8,stride=8),
-            nn.ReLU(),nn.BatchNorm2d(h_dim),
+            nn.ReLU(),
             #nn.Dropout2d(0.1),
             nn.Flatten(),
             nn.Linear(h_dim, h_dim), nn.ReLU()
@@ -50,7 +48,7 @@ class ConvVAE(nn.Module):
             nn.ReLU(),
             nn.ConvTranspose2d(80, 64, kernel_size=4,stride=4),
             nn.ReLU(),
-            nn.ConvTranspose2d(64, image_channels, kernel_size=4, stride=4 ),
+            nn.ConvTranspose2d(64, image_channels, kernel_size=4, stride=4),
             nn.Sigmoid(),
         )
 

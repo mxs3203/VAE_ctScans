@@ -18,7 +18,7 @@ trainLoader = DataLoader(dataset, batch_size=1, num_workers=1, shuffle=True)
 
 
 model = ConvVAE()
-model.load_state_dict(torch.load("../saved_models/vae_model_ep_199.pt"))
+model.load_state_dict(torch.load("../saved_models/vae_model_ep_396.pt"))
 model.eval()
 
 

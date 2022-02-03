@@ -15,7 +15,7 @@ class UnFlatten(nn.Module):
 
 
 class ConvVAE(nn.Module):
-    def __init__(self, image_channels=60, h_dim=512, z_dim=512):
+    def __init__(self, image_channels=60, h_dim=512, z_dim=1024):
         super(ConvVAE, self).__init__()
         self.z_size = z_dim
         self.encoder = nn.Sequential(
@@ -40,9 +40,9 @@ class ConvVAE(nn.Module):
         self.z_log_var = nn.Linear(h_dim, z_dim)
 
         self.decoder = nn.Sequential(
-            nn.Linear(z_dim, z_dim), nn.ReLU(),
-            UnFlatten(-1, z_dim, 1, 1),
-            nn.ConvTranspose2d(z_dim, 100, kernel_size=8,stride=8),
+            nn.Linear(z_dim, h_dim), nn.ReLU(),
+            UnFlatten(-1, h_dim, 1, 1),
+            nn.ConvTranspose2d(h_dim, 100, kernel_size=8,stride=8),
             nn.ReLU(),
             nn.ConvTranspose2d(100, 80, kernel_size=4,stride=4),
             nn.ReLU(),

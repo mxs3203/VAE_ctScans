@@ -27,9 +27,10 @@ writer = SummaryWriter(flush_secs=1)
 
 # set the learning parameters
 lr = 0.0001
-epochs = 300
+epochs = 400
 batch_size = 12
-model = ConvVAE().to(device)
+L = 1024
+model = ConvVAE(z_dim=L).to(device)
 optimizer = optim.Adam(model.parameters(), lr=lr)
 criterion = torch.nn.BCELoss(reduction='sum')
 
@@ -62,7 +63,7 @@ def MMD(a, b):
     return gaussian_kernel(a, a).mean() + gaussian_kernel(b, b).mean() - 2*gaussian_kernel(a, b).mean()
 
 def loss_function(pred, true, latent):
-    return (pred-true).pow(2).mean(), MMD(torch.randn(200, 512, requires_grad = False).to(device), latent)
+    return (pred-true).pow(2).mean(), MMD(torch.randn(512, L, requires_grad = False).to(device), latent)
 
 
 def final_loss(bce_loss, mu, logvar):
@@ -87,7 +88,7 @@ def train(ep):
         running_loss.append(loss.cpu().detach())
         running_kld.append(kld.cpu().detach())
 
-    to_print = "Epoch[{}/{}] \n\tTraining Loss: {:.3f} KLD: {:.3f}".format(epoch + 1,
+    to_print = "Epoch[{}/{}] \n\tTraining Loss: {:.8f} KLD: {:.8f}".format(epoch + 1,
                                                                epochs,
                                                                np.mean(running_loss),
                                                                np.mean(running_kld))
@@ -112,7 +113,7 @@ def validate(ep):
 
             running_loss.append(loss.cpu().detach())
             running_kld.append(kld.cpu().detach())
-        to_print = "\tValidation Loss: {:.3f} KLD: {:.3f}".format(
+        to_print = "\tValidation Loss: {:.8f} KLD: {:.8f}".format(
                                                        np.mean(running_loss),
                                                        np.mean(running_kld))
         print(to_print)
@@ -156,12 +157,12 @@ for epoch in range(epochs):
     train_loss = train(epoch)
     loss.append(train_loss)
     recon_image = validate(epoch)
-    if epoch % 10 == 1:
+    if epoch % 5 == 1:
         visualize_recon(recon_image.cpu().detach(), epoch)
         plot_latent(epoch)
         torch.save(model.state_dict(), "../saved_models/vae_model_ep_{}.pt".format(epoch))
 
-
+torch.save(model.state_dict(), "../saved_models/vae_model_last.pt")
 plt.plot(range(epochs), loss)
 plt.title("Total Loss")
 plt.show()

@@ -7,7 +7,7 @@ import pickle as p
 fixedsize = 100
 cutoff = 100
 sizes = []
-files = glob.glob("/media/mateo/data1/KIRC_CT/manifest-1644254639955/KIRC_NRRD/*.nrrd")
+files = glob.glob("/media/mateo/data1/KIRC_CT/KIRC_NRRD/*.nrrd")
 for f in files:
     filename = f.split("/")[6]
     filename = filename.split(".")[:-1]
@@ -19,7 +19,7 @@ for f in files:
             print("Saving: ", readdata.shape)
             sizes.append(readdata.shape[2])
             img = cv.normalize(readdata, None, 0, 255, cv.NORM_MINMAX).astype('uint8')
-            p.dump(img, open( "/media/mateo/data1/KIRC_CT/manifest-1644254639955/train/{}.p".format(filename), "wb" ) )
+            p.dump(img, open( "/media/mateo/data1/KIRC_CT/train/{}.p".format(filename), "wb" ) )
         elif size[2] > fixedsize:
             print("Saving: ", readdata.shape)
             mid = int(size[2]/2)
@@ -28,7 +28,7 @@ for f in files:
             img = cv.normalize(readdata, None, 0, 255, cv.NORM_MINMAX).astype('uint8')
             img = img[:,:,start:end]
             print("\t", img.shape)
-            p.dump(img, open("/media/mateo/data1/KIRC_CT/manifest-1644254639955/train/{}.p".format(filename), "wb"))
+            p.dump(img, open("/media/mateo/data1/KIRC_CT/train/{}.p".format(filename), "wb"))
         else:
             print("Ignore")
 

@@ -1,3 +1,5 @@
+import os
+
 import dicom2nifti
 import dicom2nifti.settings as settings
 settings.disable_validate_slice_increment()
@@ -56,3 +58,14 @@ for folder in todo_sampleids:
                     except ConversionValidationError:
                         print("Inconsistency in slides, skipping...", scanname2)
 
+
+
+for i in glob.glob(args.Output):
+  folders = i.split("/")
+  path = "/".join(folders[:-1])
+  name = folders[-1].split(".")[0]
+  try:
+    os.makedirs("{}/{}/".format(path, name))
+    shutil.copy(i, "{}/{}".format(path, name))
+  except OSError as e:
+    print(i, "exists")

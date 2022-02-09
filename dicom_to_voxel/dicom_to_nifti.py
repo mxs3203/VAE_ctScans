@@ -3,13 +3,39 @@ import dicom2nifti.settings as settings
 settings.disable_validate_slice_increment()
 import glob
 import shutil
+import argparse
 
 from dicom2nifti.exceptions import ConversionValidationError
 
-output_dir = '/media/mateo/data1/KIRC_CT/NIFTI'
-inital_path = "/media/mateo/data1/KIRC_CT/manifest-1644254639955/TCGA-KIRC/"
-sampleids = glob.glob("{}*".format(inital_path))
-for folder in sampleids:
+
+# Initialize parser
+parser = argparse.ArgumentParser()
+parser.add_argument("-o", "--Output", help = "Output")
+parser.add_argument("-i", "--Input", help = "Input")
+parser.add_argument("-c", "--CheckExisting", help = "Check Existing Files")
+args = parser.parse_args()
+print(args)
+
+output_dir = args.Output #'/media/mateo/data1/TCGA-LUAD_LUSC_CT/NIFTI/'
+inital_path = args.Input #"/media/mateo/data1/LUAD_LUSC_CT/manifest-1644254025834/TCGA-LUSC/"
+CHECK_EXISTING = args.CheckExisting #True
+
+if CHECK_EXISTING:
+    # Let's See if there is already some NII.GZ files so we can skip them
+    done = glob.glob("{}*.nii.gz".format(output_dir))
+    done_ids = [d.split("/")[6].split("_")[0] for d in done]
+
+    # Construct new list of files to process based on what is already done
+    todo_sampleids = []
+    sampleids = glob.glob("{}*".format(inital_path))
+    for id in sampleids:
+        id_Str = id.split("/")[-1]
+        if id_Str in done_ids:
+            todo_sampleids.append(id)
+else:
+    todo_sampleids = glob.glob("{}*".format(inital_path))
+
+for folder in todo_sampleids:
     sampleid = folder.split("/")[-1].strip()
     print(sampleid)
     person_scans = glob.glob("{}/*".format(folder))

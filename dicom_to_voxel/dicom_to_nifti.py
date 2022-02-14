@@ -2,6 +2,8 @@ import os
 
 import dicom2nifti
 import dicom2nifti.settings as settings
+from tqdm import tqdm
+
 settings.disable_validate_slice_increment()
 import glob
 import shutil
@@ -18,9 +20,9 @@ parser.add_argument("-c", "--CheckExisting", help = "Check Existing Files")
 args = parser.parse_args()
 print(args)
 
-output_dir = args.Output #'/media/mateo/data1/TCGA-LUAD_LUSC_CT/NIFTI/'
-inital_path = args.Input #"/media/mateo/data1/LUAD_LUSC_CT/manifest-1644254025834/TCGA-LUSC/"
-CHECK_EXISTING = args.CheckExisting #True
+output_dir = '/media/mateo/data1/KIRC_CT/NIFTI_again/' #args.Output #'/media/mateo/data1/TCGA-LUAD_LUSC_CT/NIFTI/'
+inital_path = "/media/mateo/data1/KIRC_CT/manifest-1644254639955/TCGA-KIRC/"# args.Input #"/media/mateo/data1/LUAD_LUSC_CT/manifest-1644254025834/TCGA-LUSC/"
+CHECK_EXISTING = False # args.CheckExisting #True
 
 if CHECK_EXISTING:
     # Let's See if there is already some NII.GZ files so we can skip them
@@ -37,7 +39,7 @@ if CHECK_EXISTING:
 else:
     todo_sampleids = glob.glob("{}*".format(inital_path))
 
-for folder in todo_sampleids:
+for folder in tqdm(todo_sampleids):
     sampleid = folder.split("/")[-1].strip()
     print(sampleid)
     person_scans = glob.glob("{}/*".format(folder))
@@ -66,6 +68,6 @@ for i in glob.glob(args.Output):
   name = folders[-1].split(".")[0]
   try:
     os.makedirs("{}/{}/".format(path, name))
-    shutil.copy(i, "{}/{}".format(path, name))
+    shutil.move(i, "{}/{}".format(path, name))
   except OSError as e:
     print(i, "exists")
